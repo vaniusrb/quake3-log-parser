@@ -3,6 +3,18 @@ name = "quake3-log-parser"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+ahash = "0.8.9"
+memmap2 = "0.9.3"
+mimalloc = "0.1.39"
+rayon = "1.8.1"
+regex = "1.10.3"
+
+[profile.release]
+opt-level = 3
+debug = false
+panic = "abort"
+debug-assertions = false
+overflow-checks = false
+lto = true
+incremental = false
