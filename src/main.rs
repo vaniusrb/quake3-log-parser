@@ -4,6 +4,7 @@ use ahash::{HashMap, HashMapExt};
 use means_of_death::MeansOfDeath;
 use memmap2::Mmap;
 use mimalloc::MiMalloc;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use std::{env::args_os, fs::File, mem, path::Path, sync::Mutex};
 
@@ -94,26 +95,19 @@ impl Matches {
     }
 }
 
-const KILL_REGEX: &str =
-    r#".*\d:\d\d (Kill: \d* \d* \d*): (?P<killer>.*) killed (?P<killed>.*) by (?P<means>.*)"#;
-const INIT_GAME_REGEX: &str = r#".*\d:\d\d InitGame:"#;
-const PLAYER_REGEX: &str = r#".*\d:\d\d ClientUserinfoChanged: \d+ n\\(?P<player>.*?)\\.*"#;
 const WORLD: &str = "<world>";
-
+static INIT_GAME_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#".*\d:\d\d InitGame:"#).unwrap());
+static PLAYER_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r#".*\d:\d\d ClientUserinfoChanged: \d+ n\\(?P<player>.*?)\\.*"#).unwrap()
+});
 static KILL_REGEX: Lazy<Regex> = Lazy::new(|| {
-    let mut m = HashMap::new();
-    m.insert(13, "Spica".to_string());
-    m.insert(74, "Hoyten".to_string());
-    Mutex::new(m)
+    Regex::new(
+        r#".*\d:\d\d (Kill: \d* \d* \d*): (?P<killer>.*) killed (?P<killed>.*) by (?P<means>.*)"#,
+    )
+    .unwrap()
 });
 
-
-
 fn main() {
-    let kill_regex = Regex::new(KILL_REGEX).unwrap();
-    let init_regex = Regex::new(INIT_GAME_REGEX).unwrap();
-    let player_regex = Regex::new(PLAYER_REGEX).unwrap();
-
     let path = args_os().nth(1).unwrap_or("res/qgames.log".into());
     //.expect("provide a path to the file as an argument");
 
@@ -121,7 +115,7 @@ fn main() {
     let file = File::open(path).expect("failed to open file");
     let mapped_data = unsafe { Mmap::map(&file) }.expect("failed to create memory map");
 
-    let raw_data = &*mapped_data;
+    let raw_data: &[u8] = &mapped_data;
 
     let rows = raw_data
         .split(|&b| b == b'\n')
@@ -130,48 +124,38 @@ fn main() {
 
     let matches = rows
         .iter()
-        .fold(Matches::default(), |mut matches, row| {
-            // New match
-            if init_regex.is_match(row) {
-                matches.new_match();
-                return matches;
-            }
-            // Logged player
-            if let Some(captures) = player_regex.captures(row) {
-                if let Some(player) = captures.name("player") {
-                    matches.add_player(player.as_str());
-                    return matches;
-                }
-            }
-            // Kill player
-            if let Some(captures) = kill_regex.captures(row) {
-                if let (Some(killer), Some(killed), Some(means)) = (
-                    captures.name("killer"),
-                    captures.name("killed"),
-                    captures.name("means"),
-                ) {
-                    match MeansOfDeath::try_from(means.as_str()) {
-                        Ok(means_of_death) => {
-                            if killer.as_str() == WORLD {
-                                matches.killed_by_world(killed.as_str(), means_of_death);
-                            } else {
-                                matches.add_kill(killer.as_str(), means_of_death);
-                            }
-                        }
-                        Err(e) => matches.add_error(&format!(
-                            "error to parse MeansOfDeath `{}`: {e}",
-                            means.as_str()
-                        )),
-                    }
-                }
-            }
-            matches
+        .fold(Matches::default(), |matches, row| {
+            analyze_event(row, matches)
         })
         .all_matches();
 
     for m in matches.into_iter().map(match_report) {
         println!("{m}");
     }
+}
+
+/// Analyze event from log row, updating info to current match if necessary.
+fn analyze_event(row: &&str, mut matches: Matches) -> Matches {
+    match event_from_row(row) {
+        Ok(event) => match event {
+            LogEvent::NewMatch => matches.new_match(),
+            LogEvent::AddPlayer(player) => matches.add_player(&player),
+            LogEvent::Kill {
+                killer,
+                killed,
+                means,
+            } => {
+                if killer == WORLD {
+                    matches.killed_by_world(&killed, means);
+                } else {
+                    matches.add_kill(&killer, means);
+                }
+            }
+            LogEvent::Other => {}
+        },
+        Err(e) => matches.add_error(&e),
+    }
+    matches
 }
 
 enum LogEvent {
@@ -185,8 +169,43 @@ enum LogEvent {
     Other,
 }
 
+/// Extract event from log row.
 fn event_from_row(row: &str) -> Result<LogEvent, String> {
-    todo!
+    // New match
+    if INIT_GAME_REGEX.is_match(row) {
+        return Ok(LogEvent::NewMatch);
+    }
+    // Logged player
+    if let Some(captures) = PLAYER_REGEX.captures(row) {
+        if let Some(player) = captures.name("player") {
+            return Ok(LogEvent::AddPlayer(player.as_str().to_string()));
+        }
+    }
+    // Kill player
+    if let Some(captures) = KILL_REGEX.captures(row) {
+        if let (Some(killer), Some(killed), Some(means)) = (
+            captures.name("killer"),
+            captures.name("killed"),
+            captures.name("means"),
+        ) {
+            match MeansOfDeath::try_from(means.as_str()) {
+                Ok(means) => {
+                    return Ok(LogEvent::Kill {
+                        killer: killer.as_str().to_string(),
+                        killed: killed.as_str().to_string(),
+                        means,
+                    });
+                }
+                Err(e) => {
+                    return Err(format!(
+                        "error to parse MeansOfDeath `{}`: {e}",
+                        means.as_str()
+                    ))
+                }
+            }
+        }
+    }
+    Ok(LogEvent::Other)
 }
 
 fn match_report(c_match: Match) -> String {
