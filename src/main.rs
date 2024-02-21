@@ -1,7 +1,8 @@
-use ahash::HashMap;
+use ahash::{HashMap, HashMapExt};
 use memmap2::Mmap;
 use mimalloc::MiMalloc;
 use rayon::{iter::ParallelIterator, slice::*};
+use regex::Regex;
 use std::{env::args_os, fs::File, path::Path};
 
 #[global_allocator]
@@ -21,11 +22,11 @@ struct Match {
 }
 
 impl Match {
-    pub fn add_kill(&mut sef, killer: &str) {
+    pub fn add_kill(&mut self, killer: &str) {
         //self.kills.
     }
 
-    pub fn killed_by_world(&mut sef, killed: &str) {
+    pub fn killed_by_world(&mut self, killed: &str) {
         //self.kills.
     }
 
@@ -36,7 +37,8 @@ const KILL_REGEX: &str = r#".*\d:\d\d (Kill: \d* \d* \d*): (?P<killer>.*) killed
 const INIT_GAME_REGEX: &str = r#".*\d:\d\d (InitGame:)"#;
 
 fn main() {
-    let kill_regex = Regex::new();
+    let kill_regex = Regex::new(KILL_REGEX).unwrap();
+    let init_regex = Regex::new(INIT_GAME_REGEX).unwrap();
 
 
     let mut matches: HashMap::new();
@@ -57,7 +59,12 @@ fn main() {
         .split(|&b| b == b'\n')
         .map(|row| unsafe { std::str::from_utf8_unchecked(row) })
         .collect::<Vec<_>>();
+
+    let mut current_match = 0;
     for row in rows {
+        if init_regex.is_match(row) {
+            current_match = Some()
+        }
         println!("{row}");
     }
 
