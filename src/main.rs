@@ -1,7 +1,7 @@
 use ahash::{HashMap, HashMapExt};
 use memmap2::Mmap;
 use mimalloc::MiMalloc;
-use rayon::{iter::ParallelIterator, slice::*};
+use rayon::{iter::{IntoParallelRefIterator, ParallelIterator}, slice::*};
 use regex::Regex;
 use std::{env::args_os, fs::File, path::Path};
 
@@ -15,6 +15,7 @@ enum Kill {
     ByWorld(String),
 }
 
+#[derive(Default)]
 struct Match {
     total_kills: u32,
     players: Vec<String> // ["Dono da bola", "Isgalamido", "Zeh"],
@@ -35,13 +36,12 @@ impl Match {
 const KILL_REGEX: &str = r#".*\d:\d\d (Kill: \d* \d* \d*): (?P<killer>.*) killed (?P<killed>.*) by (?P<cause>.*)"#;
 
 const INIT_GAME_REGEX: &str = r#".*\d:\d\d (InitGame:)"#;
+const WORLD: &str = "<world>";
 
 fn main() {
     let kill_regex = Regex::new(KILL_REGEX).unwrap();
     let init_regex = Regex::new(INIT_GAME_REGEX).unwrap();
 
-
-    let mut matches: HashMap::new();
     let path = args_os().nth(1).unwrap_or("res/qgames.log".into());
     //.expect("provide a path to the file as an argument");
 
@@ -51,22 +51,37 @@ fn main() {
 
     let raw_data = &*mapped_data;
 
-    let raw_data = raw_data.strip_suffix(b"\n").unwrap_or(raw_data);
+    // let raw_data = raw_data.strip_suffix(b"\n").unwrap_or(raw_data);
 
     let rows = raw_data
-        //
-        // .par_split(|&b| b == INIT_GAME)
         .split(|&b| b == b'\n')
         .map(|row| unsafe { std::str::from_utf8_unchecked(row) })
         .collect::<Vec<_>>();
 
-    let mut current_match = 0;
-    for row in rows {
+    let (_, map) = rows.iter().fold((0, HashMap::<usize, Vec<Kill>>::with_capacity(1000)), | mut mm, row| {
         if init_regex.is_match(row) {
-            current_match = Some()
+            mm.0 += 1;
+            return mm;
+        }; 
+        let Some(captures) = kill_regex.captures(row) else {
+            return mm;
+        };
+        let kill = match (captures.name("killer"), captures.name("killed")) {
+            (Some(killer), Some(killed)) => if killer.as_str() == WORLD {
+                Some(Kill::ByWorld(killed.as_str().into()))
+            } else {
+                Some(Kill::Killer(killer.as_str().into()))
+            },
+            _ => {None}
+        };
+        if let Some(kill) = kill {
+            mm.1.entry(mm.0).and_modify(|&mut v|v.push(kill)).or_insert(vec![kill]);
         }
-        println!("{row}");
-    }
+        mm
+        //println!("{row}");
+    });
+
+    map.par_iter().map(|m|);
 
     // let (city, sample) = row.split_once(|&b| b == b';').expect("no ; separator");
     // let sample: Value = fast_parse(sample);
