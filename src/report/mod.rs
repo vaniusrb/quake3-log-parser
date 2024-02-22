@@ -5,5 +5,5 @@ pub mod json_report;
 
 /// Parser trait, used to extract log event from a string row.
 pub trait Report {
-    fn report(&self, match_r: MatchRanking) -> String;
+    fn report(&self, matches: Vec<MatchRanking>) -> String;
 }

@@ -1,4 +1,4 @@
-use crate::entities::{means_of_death::MeansOfDeath, player::Player, game_match::GameMatch};
+use crate::entities::{game_match::GameMatch, means_of_death::MeansOfDeath, player::Player};
 use std::mem;
 
 /// Store matches list. It's not aware of log events or parser routines.
@@ -17,27 +17,30 @@ impl MatchesAccumulator {
     }
 
     /// Add player logged.
-    pub fn add_player(&mut self, player: Player) {
-        self.current_match.players.push(player);
+    pub fn add_player(&mut self, player: impl Into<Player>) {
+        self.current_match.players.push(player.into());
     }
 
     /// Add killed by world.
-    pub fn add_kill(&mut self, killer: Player, means_of_death: MeansOfDeath) {
+    pub fn add_kill(&mut self, killer: impl Into<Player>, means_of_death: MeansOfDeath) {
         self.current_match.total_kills += 1;
         self.current_match
             .kills
-            .entry(killer)
+            .entry(killer.into())
             .and_modify(|c| *c += 1)
             .or_insert(1);
         self.add_means_of_death(means_of_death);
     }
 
     /// Add killed by world.
-    pub fn killed_by_world(&mut self, killed: Player, means_of_death: MeansOfDeath) {
+    pub fn killed_by_world(&mut self, killed: impl Into<Player>, means_of_death: MeansOfDeath) {
         self.current_match.total_kills += 1;
-        self.current_match.kills.entry(killed).and_modify(|c| {
-            *c = c.checked_sub(1).unwrap_or_default();
-        });
+        self.current_match
+            .kills
+            .entry(killed.into())
+            .and_modify(|c| {
+                *c = c.checked_sub(1).unwrap_or_default();
+            });
         self.add_means_of_death(means_of_death);
     }
 
@@ -90,7 +93,7 @@ mod tests {
     #[test]
     fn match_analyzer_add_player_test() {
         let mut matches = MatchesAccumulator::default();
-        matches.add_player("Stallone".into());
+        matches.add_player("Stallone");
         assert!(matches
             .all_matches()
             .iter()
@@ -100,7 +103,7 @@ mod tests {
     #[test]
     fn match_analyzer_kill_test() {
         let mut matches = MatchesAccumulator::default();
-        matches.add_kill("Stallone".into(), MeansOfDeath::ModBfg);
+        matches.add_kill("Stallone", MeansOfDeath::ModBfg);
         assert!(matches.clone().all_matches().iter().any(|m| m
             .kills
             .iter()
@@ -115,22 +118,22 @@ mod tests {
     #[test]
     fn match_analyzer_total_kill_test() {
         let mut matches = MatchesAccumulator::default();
-        matches.add_kill("Stallone".into(), MeansOfDeath::ModBfg);
-        matches.add_kill("Stallone".into(), MeansOfDeath::ModBfg);
-        matches.add_kill("Rambo".into(), MeansOfDeath::ModBfgSplash);
+        matches.add_kill("Stallone", MeansOfDeath::ModBfg);
+        matches.add_kill("Stallone", MeansOfDeath::ModBfg);
+        matches.add_kill("Rambo", MeansOfDeath::ModBfgSplash);
         assert_eq!(3, matches.all_matches().first().unwrap().total_kills);
     }
 
     #[test]
     fn match_analyzer_kill_by_world_test() {
         let mut matches = MatchesAccumulator::default();
-        matches.add_kill("Stallone".into(), MeansOfDeath::ModBfg);
+        matches.add_kill("Stallone", MeansOfDeath::ModBfg);
         assert!(matches.clone().all_matches().iter().any(|m| m
             .kills
             .iter()
             .any(|p| *p.0 == "Stallone".into() && *p.1 == 1)));
 
-        matches.killed_by_world("Stallone".into(), MeansOfDeath::ModFalling);
+        matches.killed_by_world("Stallone", MeansOfDeath::ModFalling);
         assert!(matches.clone().all_matches().iter().any(|m| m
             .kills
             .iter()

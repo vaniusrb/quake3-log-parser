@@ -64,9 +64,7 @@ fn main() {
 
     let report: Box<dyn Report> = Box::new(FormattedReport::new());
 
-    for m in rankings.into_iter().map(|s_match| report.report(s_match)) {
-        println!("{m}");
-    }
+    println!("{}", report.report(rankings));
 }
 
 #[cfg(test)]

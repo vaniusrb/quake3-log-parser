@@ -25,7 +25,7 @@ impl Default for KillsByMeansReport {
 }
 
 impl Report for KillsByMeansReport {
-    fn report(&self, s_match: MatchRanking) -> String {
+    fn report(&self, matches: Vec<MatchRanking>) -> String {
         todo!()
     }
 }

@@ -44,3 +44,5 @@ parser is decoupled from the summarize
 generic
 mock parser
 new type
+    impl Into<Player>
+    

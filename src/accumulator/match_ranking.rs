@@ -43,13 +43,13 @@ mod testes {
     #[test]
     fn match_ranking_test() {
         let mut matches = MatchesAccumulator::default();
-        matches.add_kill("Stallone".into(), MeansOfDeath::ModBfg);
-        matches.add_kill("Stallone".into(), MeansOfDeath::ModBfg);
-        matches.add_kill("Rambo".into(), MeansOfDeath::ModBfgSplash);
+        matches.add_kill("Terminator", MeansOfDeath::ModBfg);
+        matches.add_kill("Terminator", MeansOfDeath::ModBfg);
+        matches.add_kill("Rambo", MeansOfDeath::ModBfgSplash);
         let m = matches.all_matches().remove(0);
         let mr = MatchRanking::new(m);
         assert_eq!(3, mr.total_kills);
-        assert_eq!(Player("Stallone".into()), mr.ranking[0].0);
+        assert_eq!(Player("Terminator".into()), mr.ranking[0].0);
         assert_eq!(2, mr.ranking[0].1);
         assert_eq!(Player("Rambo".into()), mr.ranking[1].0);
         assert_eq!(1, mr.ranking[1].1);
