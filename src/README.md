@@ -9,7 +9,7 @@ https://gist.github.com/cloudwalk-tests/704a555a0fe475ae0284ad9088e203f1
 
 NOTE:
 Not all choices used here should be used always and anywhere, it's just to demonstrate knowledge.
-It's expected be considered a "over engineering" just to parse a log. In a real world could be simpler.
+Use of some features it's expected be considered a "over engineering" just to parse a log. In a real world it could be simpler.
 
 Example:
 reduce file size
@@ -29,3 +29,10 @@ rayon
     when have cpu processing, for I/O should use Async with Tokio
 once_cell / lazy load
 strum
+
+mem::take
+static MATCH_COUNTER: Mutex<u32> = Mutex::new(0u32);
+from_utf8_unchecked
+
+
+could be used different parser implementations
