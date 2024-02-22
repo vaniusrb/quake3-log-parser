@@ -1,12 +1,12 @@
-use crate::{log_event::LogEvent, matches::Matches, parser::Parser};
+use crate::{log_event::LogEvent, matches::MatchesList, parser::Parser};
 
-pub struct Analyzer<T: Parser> {
-    matches: Matches,
+pub struct MatchAnalyzer<T: Parser> {
+    matches: MatchesList,
     parser: T,
 }
 
-impl<T: Parser> Analyzer<T> {
-    pub fn new(parser: T, matches: Matches) -> Self {
+impl<T: Parser> MatchAnalyzer<T> {
+    pub fn new(parser: T, matches: MatchesList) -> Self {
         Self { matches, parser }
     }
 
@@ -29,7 +29,7 @@ impl<T: Parser> Analyzer<T> {
         self
     }
 
-    pub fn matches(self) -> Matches {
+    pub fn matches_list(self) -> MatchesList {
         self.matches
     }
 }

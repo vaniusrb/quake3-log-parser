@@ -1,26 +1,30 @@
-use crate::{means_of_death::MeansOfDeath, single_match::SingleMatch};
+use crate::{means_of_death::MeansOfDeath, single_match::MatchAccumulator};
 use std::mem;
 
+/// Store matches list.
 #[derive(Debug, Default)]
-pub struct Matches {
-    current_match: SingleMatch,
-    matches: Vec<SingleMatch>,
+pub struct MatchesList {
+    match_acc: MatchAccumulator,
+    matches: Vec<MatchAccumulator>,
     errors: Vec<String>,
 }
 
-impl Matches {
+impl MatchesList {
+    /// Initiate a new match
     pub fn new_match(&mut self) {
-        let last_match = mem::take(&mut self.current_match);
+        let last_match = mem::take(&mut self.match_acc);
         self.matches.push(last_match);
     }
 
+    /// Add player logged.
     pub fn add_player(&mut self, player: &str) {
-        self.current_match.players.push(player.to_string());
+        self.match_acc.players.push(player.to_string());
     }
 
+    /// Add killed by world.
     pub fn add_kill(&mut self, killer: &str, means_of_death: MeansOfDeath) {
-        self.current_match.total_kills += 1;
-        self.current_match
+        self.match_acc.total_kills += 1;
+        self.match_acc
             .kills
             .entry(killer.into())
             .and_modify(|c| *c += 1)
@@ -28,31 +32,32 @@ impl Matches {
         self.add_means_of_death(means_of_death);
     }
 
+    /// Add killed by world.
     pub fn killed_by_world(&mut self, killed: &str, means_of_death: MeansOfDeath) {
-        self.current_match.total_kills += 1;
-        self.current_match
-            .kills
-            .entry(killed.into())
-            .and_modify(|c| {
-                *c = c.checked_sub(1).unwrap_or_default();
-            });
+        self.match_acc.total_kills += 1;
+        self.match_acc.kills.entry(killed.into()).and_modify(|c| {
+            *c = c.checked_sub(1).unwrap_or_default();
+        });
         self.add_means_of_death(means_of_death);
     }
 
+    /// Add means of death.
     fn add_means_of_death(&mut self, means_of_death: MeansOfDeath) {
-        self.current_match
+        self.match_acc
             .means_of_death
             .entry(means_of_death)
             .and_modify(|c| *c += 1)
             .or_insert(1);
     }
 
+    /// Register an error.
     pub fn add_error(&mut self, error: &str) {
         self.errors.push(error.to_string());
     }
 
-    pub fn all_matches(mut self) -> Vec<SingleMatch> {
-        self.matches.push(self.current_match);
+    /// Returns all matches collected.
+    pub fn all_matches(mut self) -> Vec<MatchAccumulator> {
+        self.matches.push(self.match_acc);
         self.matches
     }
 }

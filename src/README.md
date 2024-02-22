@@ -7,9 +7,10 @@ test url:
 https://gist.github.com/cloudwalk-tests/704a555a0fe475ae0284ad9088e203f1
 
 
-NOTE:
+REMAINDER / NOTE:
 Not all choices used here should be used always and anywhere, it's just to demonstrate knowledge.
-Use of some features it's expected be considered a "over engineering" just to parse a log. In a real world it could be simpler.
+Some implementations it's expected be considered a "over engineering" just to parse a log. 
+In a real world it could be much simpler.
 
 Example:
 reduce file size
@@ -36,3 +37,5 @@ from_utf8_unchecked
 
 
 could be used different parser implementations
+
+parser is decoupled from the summarize 

@@ -4,11 +4,15 @@ use crate::MeansOfDeath;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
+/// World "player", used when the player is dead by the world environment.
 const WORLD: &str = "<world>";
+/// Regex to detect when a new game is initiated.
 static INIT_GAME_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#".*\d:\d\d InitGame:"#).unwrap());
+/// Regex to detected when a player is connected.
 static PLAYER_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r#".*\d:\d\d ClientUserinfoChanged: \d+ n\\(?P<player>.*?)\\.*"#).unwrap()
 });
+/// Regex to detected when a kill happens.
 static KILL_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(
         r#".*\d:\d\d (Kill: \d* \d* \d*): (?P<killer>.*) killed (?P<killed>.*) by (?P<means>.*)"#,
@@ -16,6 +20,7 @@ static KILL_REGEX: Lazy<Regex> = Lazy::new(|| {
     .unwrap()
 });
 
+/// Parser log file using static regex.
 pub struct RegexParser {
     init_game_regex: &'static Regex,
     player_regex: &'static Regex,
@@ -61,13 +66,13 @@ impl Parser for RegexParser {
                 match MeansOfDeath::try_from(means.as_str()) {
                     Ok(means) => {
                         let kill = if killer.as_str() == WORLD {
-                            LogEvent::Kill {
-                                killer: killer.as_str().to_string(),
+                            LogEvent::KilledByWorld {
+                                killed: killed.as_str().to_string(),
                                 means,
                             }
                         } else {
-                            LogEvent::KilledByWorld {
-                                killed: killed.as_str().to_string(),
+                            LogEvent::Kill {
+                                killer: killer.as_str().to_string(),
                                 means,
                             }
                         };
