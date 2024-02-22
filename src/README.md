@@ -39,3 +39,5 @@ from_utf8_unchecked
 could be used different parser implementations
 
 parser is decoupled from the summarize 
+generic
+mock parser

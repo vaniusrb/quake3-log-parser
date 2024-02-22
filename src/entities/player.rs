@@ -1,8 +1,8 @@
 use std::fmt;
 
 /// New type for player.
-#[derive(Debug, PartialEq, Eq, Hash)]
-pub struct Player(String);
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Player(pub String);
 
 impl From<&str> for Player {
     fn from(value: &str) -> Self {

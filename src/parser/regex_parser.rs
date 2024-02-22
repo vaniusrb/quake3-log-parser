@@ -1,6 +1,6 @@
-use crate::log_event::LogEvent;
+use crate::entities::log_event::LogEvent;
+use crate::entities::means_of_death::MeansOfDeath;
 use crate::parser::Parser;
-use crate::MeansOfDeath;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
@@ -88,5 +88,68 @@ impl Parser for RegexParser {
             }
         }
         Ok(LogEvent::Other)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RegexParser;
+    use crate::{
+        entities::{log_event::LogEvent, means_of_death::MeansOfDeath},
+        parser::Parser,
+    };
+
+    #[test]
+    fn init_game_test() {
+        let parser = RegexParser::new();
+        let row = r#"20:37 InitGame: \sv_floodProtect\1\sv_maxPing\0\sv_minPing\0\sv_maxRate\10000\sv_minRate\
+0\sv_hostname\Code Miner Server\g_gametype\0\sv_privateClients\2\sv_maxclients\16\sv_allowDownload\0\bot_minplayers\
+0\dmflags\0\fraglimit\20\timelimit\15\g_maxGameClients\0\capturelimit\8\version\ioq3 1.36 linux-x86_64 Apr 12 2009\
+protocol\68\mapname\q3dm17\gamename\baseq3\g_needpass\0"#;
+        assert_eq!(LogEvent::NewMatch, parser.parse(row).unwrap());
+    }
+
+    #[test]
+    fn init_add_player_test() {
+        let parser = RegexParser::new();
+        let row = r#"20:38 ClientUserinfoChanged: 2 n\Isgalamido\t\0\model\uriel/zael\hmodel\uriel/zael\
+g_redteam\\g_blueteam\\c1\5\c2\5\hc\100\w\0\l\0\tt\0\tl\0"#;
+        assert_eq!(
+            LogEvent::AddPlayer("Isgalamido".into()),
+            parser.parse(row).unwrap()
+        );
+    }
+
+    #[test]
+    fn add_kill_test() {
+        let parser = RegexParser::new();
+        let row = r#"20:54 Kill: 1022 2 22: <world> killed Isgalamido by MOD_TRIGGER_HURT"#;
+        assert_eq!(
+            LogEvent::KilledByWorld {
+                killed: "Isgalamido".into(),
+                means: MeansOfDeath::ModTriggerHurt
+            },
+            parser.parse(row).unwrap()
+        );
+    }
+
+    #[test]
+    fn add_kill_by_world_test() {
+        let parser = RegexParser::new();
+        let row = r#"1:08 Kill: 3 2 6: Isgalamido killed Mocinha by MOD_ROCKET"#;
+        assert_eq!(
+            LogEvent::Kill {
+                killer: "Isgalamido".into(),
+                means: MeansOfDeath::ModRocket
+            },
+            parser.parse(row).unwrap()
+        );
+    }
+
+    #[test]
+    fn error_test() {
+        let parser = RegexParser::new();
+        let row = r#"1:08 Kill: 3 2 6: Isgalamido killed Mocinha by MOD_INVALID"#;
+        assert!(parser.parse(row).is_err());
     }
 }

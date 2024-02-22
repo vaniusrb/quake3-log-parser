@@ -1,4 +1,6 @@
-use crate::match_ranking::MatchRanking;
+use crate::accumulator::match_ranking::MatchRanking;
+
+pub mod formatted_report;
 
 /// Parser trait, used to extract log event from a string row.
 pub trait Report {

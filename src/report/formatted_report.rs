@@ -1,4 +1,4 @@
-use crate::{match_ranking::MatchRanking, report::Report};
+use crate::{accumulator::match_ranking::MatchRanking, report::Report};
 
 pub struct FormattedReport {}
 

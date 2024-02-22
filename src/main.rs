@@ -1,25 +1,16 @@
-pub mod analyzer;
-pub mod formatted_report;
-pub mod log_event;
-pub mod match_ranking;
-pub mod matches;
-pub mod means_of_death;
+pub mod accumulator;
+pub mod entities;
 pub mod parser;
-pub mod regex_parser;
 pub mod report;
-pub mod single_match;
-mod player;
 
-use analyzer::MatchAnalyzer;
-use formatted_report::FormattedReport;
-use match_ranking::MatchRanking;
-use matches::MatchesList;
-use means_of_death::MeansOfDeath;
+use accumulator::{
+    analyzer::MatchAnalyzer, match_ranking::MatchRanking, matches_accumulator::MatchesAccumulator,
+};
 use memmap2::Mmap;
 use mimalloc::MiMalloc;
+use parser::regex_parser::RegexParser;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use regex_parser::RegexParser;
-use report::Report;
+use report::{formatted_report::FormattedReport, Report};
 use std::{env::args_os, fs::File, path::Path};
 
 #[global_allocator]
@@ -42,10 +33,10 @@ fn main() {
     let matches_list = rows
         .iter()
         .fold(
-            MatchAnalyzer::new(RegexParser::default(), MatchesList::default()),
+            MatchAnalyzer::new(RegexParser::default(), MatchesAccumulator::default()),
             |analyzer, row| analyzer.digest(row),
         )
-        .matches_list();
+        .matches();
 
     // Sort ranking with parallelism
     let rankings = matches_list

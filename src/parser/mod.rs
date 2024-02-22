@@ -1,5 +1,6 @@
-use crate::log_event::LogEvent;
+use crate::entities::log_event::LogEvent;
 
+pub mod regex_parser;
 
 /// Parser trait, used to extract log event from a string row.
 pub trait Parser {
