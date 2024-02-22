@@ -7,7 +7,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 struct KillsByMeans {
-    kills_by_means: HashMap<MeansOfDeath, u32>,
+    kills_by_means: BTreeMap<MeansOfDeath, u32>,
 }
 
 pub struct KillsByMeansReport {}
@@ -29,6 +29,16 @@ impl Report for KillsByMeansReport {
         todo!()
     }
 }
+
+
+// "game-1": {
+//     "kills_by_means": {
+//       "MOD_SHOTGUN": 10,
+//       "MOD_RAILGUN": 2,
+//       "MOD_GAUNTLET": 1,
+//       ...
+//     }
+//   }
 
 // /**
 //  *
