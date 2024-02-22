@@ -1,9 +1,9 @@
-use crate::MeansOfDeath;
+use crate::{player::Player, MeansOfDeath};
 
 pub enum LogEvent {
     NewMatch,
-    AddPlayer(String),
-    Kill { killer: String, means: MeansOfDeath },
-    KilledByWorld { killed: String, means: MeansOfDeath },
+    AddPlayer(Player),
+    Kill { killer: Player, means: MeansOfDeath },
+    KilledByWorld { killed: Player, means: MeansOfDeath },
     Other,
 }

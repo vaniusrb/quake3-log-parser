@@ -53,7 +53,7 @@ impl Parser for RegexParser {
         // Logged player
         if let Some(captures) = self.player_regex.captures(row) {
             if let Some(player) = captures.name("player") {
-                return Ok(LogEvent::AddPlayer(player.as_str().to_string()));
+                return Ok(LogEvent::AddPlayer(player.as_str().into()));
             }
         }
         // Kill player
@@ -67,12 +67,12 @@ impl Parser for RegexParser {
                     Ok(means) => {
                         let kill = if killer.as_str() == WORLD {
                             LogEvent::KilledByWorld {
-                                killed: killed.as_str().to_string(),
+                                killed: killed.as_str().into(),
                                 means,
                             }
                         } else {
                             LogEvent::Kill {
-                                killer: killer.as_str().to_string(),
+                                killer: killer.as_str().into(),
                                 means,
                             }
                         };

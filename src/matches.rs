@@ -1,4 +1,4 @@
-use crate::{means_of_death::MeansOfDeath, single_match::MatchAccumulator};
+use crate::{means_of_death::MeansOfDeath, player::Player, single_match::MatchAccumulator};
 use std::mem;
 
 /// Store matches list.
@@ -17,25 +17,25 @@ impl MatchesList {
     }
 
     /// Add player logged.
-    pub fn add_player(&mut self, player: &str) {
-        self.match_acc.players.push(player.to_string());
+    pub fn add_player(&mut self, player: Player) {
+        self.match_acc.players.push(player);
     }
 
     /// Add killed by world.
-    pub fn add_kill(&mut self, killer: &str, means_of_death: MeansOfDeath) {
+    pub fn add_kill(&mut self, killer: Player, means_of_death: MeansOfDeath) {
         self.match_acc.total_kills += 1;
         self.match_acc
             .kills
-            .entry(killer.into())
+            .entry(killer)
             .and_modify(|c| *c += 1)
             .or_insert(1);
         self.add_means_of_death(means_of_death);
     }
 
     /// Add killed by world.
-    pub fn killed_by_world(&mut self, killed: &str, means_of_death: MeansOfDeath) {
+    pub fn killed_by_world(&mut self, killed: Player, means_of_death: MeansOfDeath) {
         self.match_acc.total_kills += 1;
-        self.match_acc.kills.entry(killed.into()).and_modify(|c| {
+        self.match_acc.kills.entry(killed).and_modify(|c| {
             *c = c.checked_sub(1).unwrap_or_default();
         });
         self.add_means_of_death(means_of_death);

@@ -8,6 +8,7 @@ pub mod parser;
 pub mod regex_parser;
 pub mod report;
 pub mod single_match;
+mod player;
 
 use analyzer::MatchAnalyzer;
 use formatted_report::FormattedReport;

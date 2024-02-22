@@ -15,12 +15,12 @@ impl<T: Parser> MatchAnalyzer<T> {
         match self.parser.parse(row) {
             Ok(event) => match event {
                 LogEvent::NewMatch => self.matches.new_match(),
-                LogEvent::AddPlayer(player) => self.matches.add_player(&player),
+                LogEvent::AddPlayer(player) => self.matches.add_player(player),
                 LogEvent::Kill { killer, means } => {
-                    self.matches.add_kill(&killer, means);
+                    self.matches.add_kill(killer, means);
                 }
                 LogEvent::KilledByWorld { killed, means } => {
-                    self.matches.killed_by_world(&killed, means)
+                    self.matches.killed_by_world(killed, means)
                 }
                 LogEvent::Other => {}
             },
