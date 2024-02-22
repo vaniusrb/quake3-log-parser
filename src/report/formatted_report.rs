@@ -34,9 +34,9 @@ fn report_match(s_match: MatchRanking) -> String {
         lines.push_str(&format!("{} - {player}: {kills}\n", i + 1));
     }
 
-    for (i, (means, kills)) in s_match.means.into_iter().enumerate() {
-        lines.push_str(&format!("{} - {means}: {kills}\n", i + 1));
-    }
+    // for (i, (means, kills)) in s_match.means.into_iter().enumerate() {
+    //     lines.push_str(&format!("{} - {means}: {kills}\n", i + 1));
+    // }
 
     lines.push('\n');
     lines

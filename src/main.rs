@@ -18,6 +18,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use crate::report::json_report::KillsByMeansReport;
+
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
@@ -33,7 +35,7 @@ struct Args {
 }
 
 fn main() {
-    let args = Args::parse();
+    let mut args = Args::parse();
     let path = args.file;
     //.expect("provide a path to the file as an argument");
 
@@ -62,7 +64,12 @@ fn main() {
         .map(MatchRanking::new)
         .collect::<Vec<_>>();
 
-    let report: Box<dyn Report> = Box::new(FormattedReport::new());
+    // args.mod_ = true;
+    let report: Box<dyn Report> = if args.mod_ {
+        Box::new(KillsByMeansReport::new())
+    } else {
+        Box::new(FormattedReport::new())
+    };
 
     println!("{}", report.report(rankings));
 }
