@@ -6,7 +6,7 @@ static MATCH_COUNTER: Mutex<u32> = Mutex::new(0u32);
 
 /// Data of a game match.
 #[derive(Debug, Clone)]
-pub struct SingleMatch {
+pub struct GameMatch {
     pub id: u32,
     pub total_kills: u32,
     pub players: Vec<Player>,
@@ -14,7 +14,7 @@ pub struct SingleMatch {
     pub means_of_death: HashMap<MeansOfDeath, u32>,
 }
 
-impl Default for SingleMatch {
+impl Default for GameMatch {
     fn default() -> Self {
         // Get current match id
         let mut guard = MATCH_COUNTER.lock().unwrap();

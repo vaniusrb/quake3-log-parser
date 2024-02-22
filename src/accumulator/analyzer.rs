@@ -1,7 +1,7 @@
 use super::matches_accumulator::MatchesAccumulator;
 use crate::{entities::log_event::LogEvent, parser::Parser};
 
-/// `MatchAnalyzer` is responsible to analyze a log event and
+/// `MatchAnalyzer` is responsible to analyze a log event and update a `MatchesAccumulator`.
 pub struct MatchAnalyzer<T: Parser> {
     matches: MatchesAccumulator,
     parser: T,

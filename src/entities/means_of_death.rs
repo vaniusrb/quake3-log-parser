@@ -1,7 +1,8 @@
+use serde::Serialize;
 use strum::*;
 
 /// Means of death.
-#[derive(Debug, Display, EnumString, Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Debug, Display, EnumString, Clone, Copy, Hash, PartialEq, Eq, Serialize)]
 #[strum(serialize_all = "shouty_snake_case")]
 pub enum MeansOfDeath {
     ModUnknown,

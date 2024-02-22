@@ -1,5 +1,6 @@
-use crate::entities::{means_of_death::MeansOfDeath, player::Player, single_match::SingleMatch};
+use crate::entities::{game_match::GameMatch, means_of_death::MeansOfDeath, player::Player};
 
+/// Ranking of a game match.
 pub struct MatchRanking {
     pub id: u32,
     pub total_kills: u32,
@@ -9,23 +10,23 @@ pub struct MatchRanking {
 }
 
 impl MatchRanking {
-    pub fn new(s_match: SingleMatch) -> Self {
-        let mut ranking: Vec<(Player, u32)> = s_match
+    pub fn new(g_match: GameMatch) -> Self {
+        let mut ranking: Vec<(Player, u32)> = g_match
             .kills
             .into_iter()
             .map(|m| (m.0, m.1))
             .collect::<Vec<_>>();
         ranking.sort_by(|a, b| b.1.cmp(&a.1));
-        let mut means: Vec<(MeansOfDeath, u32)> = s_match
+        let mut means: Vec<(MeansOfDeath, u32)> = g_match
             .means_of_death
             .into_iter()
             .map(|m| (m.0, m.1))
             .collect::<Vec<_>>();
         means.sort_by(|a, b| b.1.cmp(&a.1));
         Self {
-            id: s_match.id,
-            total_kills: s_match.total_kills,
-            players: s_match.players,
+            id: g_match.id,
+            total_kills: g_match.total_kills,
+            players: g_match.players,
             ranking,
             means,
         }

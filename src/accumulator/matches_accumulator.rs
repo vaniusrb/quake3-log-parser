@@ -1,30 +1,30 @@
-use crate::entities::{means_of_death::MeansOfDeath, player::Player, single_match::SingleMatch};
+use crate::entities::{means_of_death::MeansOfDeath, player::Player, game_match::GameMatch};
 use std::mem;
 
 /// Store matches list. It's not aware of log events or parser routines.
 #[derive(Debug, Clone, Default)]
 pub struct MatchesAccumulator {
-    current_match_acc: SingleMatch,
-    matches: Vec<SingleMatch>,
+    current_match: GameMatch,
+    matches: Vec<GameMatch>,
     errors: Vec<String>,
 }
 
 impl MatchesAccumulator {
     /// Initiate a new match
     pub fn new_match(&mut self) {
-        let last_match = mem::take(&mut self.current_match_acc);
+        let last_match = mem::take(&mut self.current_match);
         self.matches.push(last_match);
     }
 
     /// Add player logged.
     pub fn add_player(&mut self, player: Player) {
-        self.current_match_acc.players.push(player);
+        self.current_match.players.push(player);
     }
 
     /// Add killed by world.
     pub fn add_kill(&mut self, killer: Player, means_of_death: MeansOfDeath) {
-        self.current_match_acc.total_kills += 1;
-        self.current_match_acc
+        self.current_match.total_kills += 1;
+        self.current_match
             .kills
             .entry(killer)
             .and_modify(|c| *c += 1)
@@ -34,8 +34,8 @@ impl MatchesAccumulator {
 
     /// Add killed by world.
     pub fn killed_by_world(&mut self, killed: Player, means_of_death: MeansOfDeath) {
-        self.current_match_acc.total_kills += 1;
-        self.current_match_acc.kills.entry(killed).and_modify(|c| {
+        self.current_match.total_kills += 1;
+        self.current_match.kills.entry(killed).and_modify(|c| {
             *c = c.checked_sub(1).unwrap_or_default();
         });
         self.add_means_of_death(means_of_death);
@@ -43,7 +43,7 @@ impl MatchesAccumulator {
 
     /// Add means of death.
     fn add_means_of_death(&mut self, means_of_death: MeansOfDeath) {
-        self.current_match_acc
+        self.current_match
             .means_of_death
             .entry(means_of_death)
             .and_modify(|c| *c += 1)
@@ -66,8 +66,8 @@ impl MatchesAccumulator {
     }
 
     /// Returns all matches collected.
-    pub fn all_matches(mut self) -> Vec<SingleMatch> {
-        self.matches.push(self.current_match_acc);
+    pub fn all_matches(mut self) -> Vec<GameMatch> {
+        self.matches.push(self.current_match);
         self.matches
     }
 }

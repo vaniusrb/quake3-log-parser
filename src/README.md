@@ -1,3 +1,6 @@
+todo:
+- format report
+    json / human
 
 
 fast read and parser file:
@@ -33,7 +36,6 @@ strum
 
 mem::take
 static MATCH_COUNTER: Mutex<u32> = Mutex::new(0u32);
-from_utf8_unchecked
 
 
 could be used different parser implementations
@@ -41,3 +43,4 @@ could be used different parser implementations
 parser is decoupled from the summarize 
 generic
 mock parser
+new type

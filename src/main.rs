@@ -6,18 +6,35 @@ pub mod report;
 use accumulator::{
     analyzer::MatchAnalyzer, match_ranking::MatchRanking, matches_accumulator::MatchesAccumulator,
 };
+use clap::Parser;
 use memmap2::Mmap;
 use mimalloc::MiMalloc;
 use parser::regex_parser::RegexParser;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use report::{formatted_report::FormattedReport, Report};
-use std::{env::args_os, fs::File, path::Path};
+use std::{
+    env::args_os,
+    fs::File,
+    path::{Path, PathBuf},
+};
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Log filename
+    #[arg(short, long, default_value = "res/qgames.log")]
+    file: PathBuf,
+    /// Show Means of death
+    #[arg(long)]
+    mod_: bool,
+}
+
 fn main() {
-    let path = args_os().nth(1).unwrap_or("res/qgames.log".into());
+    let args = Args::parse();
+    let path = args.file;
     //.expect("provide a path to the file as an argument");
 
     let path = Path::new(&path);
