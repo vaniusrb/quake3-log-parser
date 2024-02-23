@@ -1,14 +1,17 @@
 use crate::{accumulator::match_ranking::MatchRanking, report::Report};
 
+/// Players ranking report.
 pub struct RankingReport {}
 
 impl RankingReport {
+    /// Creates a new ´RankingReport`.
     pub fn new() -> Self {
         Self {}
     }
 }
 
 impl Default for RankingReport {
+    /// Creates a new ´RankingReport`.
     fn default() -> Self {
         Self::new()
     }
@@ -24,6 +27,7 @@ impl Report for RankingReport {
     }
 }
 
+/// Generates string report from a `MatchRanking`.
 fn report_match(s_match: MatchRanking) -> String {
     let mut lines = format!(
         "Match {}\nTotal kills: {}\nRanking:\n",

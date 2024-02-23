@@ -10,6 +10,7 @@ pub struct MatchRanking {
 }
 
 impl MatchRanking {
+    /// Creates a new `MatchRanking` from a `GameMatch`.
     pub fn new(g_match: GameMatch) -> Self {
         let mut ranking: Vec<(Player, u32)> = g_match
             .kills

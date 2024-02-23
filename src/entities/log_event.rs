@@ -1,6 +1,6 @@
 use super::{means_of_death::MeansOfDeath, player::Player};
 
-/// Type of log events.
+/// Type of log event.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LogEvent {
     NewMatch,

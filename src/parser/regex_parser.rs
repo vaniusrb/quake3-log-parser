@@ -8,11 +8,11 @@ use regex::Regex;
 const WORLD: &str = "<world>";
 /// Regex to detect when a new game is initiated.
 static INIT_GAME_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r#".*\d:\d\d InitGame:"#).unwrap());
-/// Regex to detected when a player is connected.
+/// Regex to intercept when a player is connected.
 static PLAYER_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r#".*\d:\d\d ClientUserinfoChanged: \d+ n\\(?P<player>.*?)\\.*"#).unwrap()
 });
-/// Regex to detected when a kill happens.
+/// Regex to intercept when a kill happens.
 static KILL_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(
         r#".*\d:\d\d (Kill: \d* \d* \d*): (?P<killer>.*) killed (?P<killed>.*) by (?P<means>.*)"#,
@@ -28,6 +28,7 @@ pub struct RegexParser {
 }
 
 impl RegexParser {
+    /// Creates a new `RegexParser`.
     pub fn new() -> Self {
         Self {
             init_game_regex: &INIT_GAME_REGEX,
@@ -38,6 +39,7 @@ impl RegexParser {
 }
 
 impl Default for RegexParser {
+    /// Creates a new `RegexParser`.
     fn default() -> Self {
         Self::new()
     }

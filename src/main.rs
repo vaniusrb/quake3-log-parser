@@ -22,7 +22,7 @@ use std::{
 static GLOBAL: MiMalloc = MiMalloc;
 
 #[derive(Parser, Debug)]
-#[command(version, about = "Parser to Quake 3 Arena server log")]
+#[command(version, about = "Quake 3 Arena Server Log Parser")]
 struct Args {
     /// Log filename
     #[arg(short, long, default_value = "res/qgames.log")]
@@ -36,16 +36,18 @@ fn main() {
     let args = Args::parse();
     let path = args.file;
 
+    // Load file content
     let path = Path::new(&path);
     let file = File::open(path).expect("error to open file");
     let mapped_data = unsafe { Mmap::map(&file) }.expect("error to create memory map");
 
+    // Split buffer into rows
     let rows = &mapped_data
         .split(|&b| b == b'\n')
         .map(|row| unsafe { std::str::from_utf8_unchecked(row) })
         .collect::<Vec<_>>();
 
-    // Extract matches list from log rows
+    // Parse the log from the row and extract matches list
     let matches_list = rows
         .iter()
         .fold(

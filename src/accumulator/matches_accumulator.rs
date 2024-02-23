@@ -1,7 +1,7 @@
 use crate::entities::{game_match::GameMatch, means_of_death::MeansOfDeath, player::Player};
 use std::mem;
 
-/// Store matches list. It's not aware of log events or parser routines.
+/// Accumulate data and store matches list.
 #[derive(Debug, Clone, Default)]
 pub struct MatchesAccumulator {
     current_match: GameMatch,
