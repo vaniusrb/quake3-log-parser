@@ -10,7 +10,7 @@ pub struct MatchesAccumulator {
 }
 
 impl MatchesAccumulator {
-    /// Initiate a new match
+    /// Initiate a new match.
     pub fn new_match(&mut self) {
         let last_match = mem::take(&mut self.current_match);
         self.matches.push(last_match);
