@@ -38,7 +38,7 @@ Generate report for players ranking:
 cargo run --
 ```
 
-Generate report for kills by means report: 
+Generate report for kills by means: 
 ```terminal
 cargo run -- --kbm
 ```
