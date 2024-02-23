@@ -7,8 +7,8 @@ Some implementations are expected to be considered "over-engineering" just to pa
 
 ### Features, libraries and functions used ###
 
-* Cargo `profile.release` was defined for high performance.
-* Crate `memmap` for memory mapped file, resulting in high-performance file reading.  
+* Cargo `profile.release` was configured for better performance.
+* Crate `memmap` for memory mapped file, resulting in fast file reading.  
 * Crate `mimalloc` allocator has excellent performance and reduces memory fragmentation.
 * Function `from_str_unchecked` for fast String allocation.
 * Crate `ahash` for fast HashMap implementation.
