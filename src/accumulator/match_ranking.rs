@@ -1,6 +1,6 @@
 use crate::entities::{game_match::GameMatch, means_of_death::MeansOfDeath, player::Player};
 
-/// Ranking of a game match.
+/// Ranking of a game match. It sorts players and means of death in descending order.
 pub struct MatchRanking {
     pub id: u32,
     pub total_kills: u32,

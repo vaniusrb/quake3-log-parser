@@ -2,13 +2,11 @@ todo:
 - format report
     json / human
 
-
 fast read and parser file:
 https://github.com/mtb0x1/1brc
 
 test url:
 https://gist.github.com/cloudwalk-tests/704a555a0fe475ae0284ad9088e203f1
-
 
 REMAINDER / NOTE:
 Not all choices used here should be used always and anywhere, it's just to demonstrate knowledge.
@@ -16,10 +14,11 @@ Some implementations it's expected be considered a "over engineering" just to pa
 In a real world it could be much simpler.
 
 Example:
+Some features:
+* `memmap` for 
+* `mimalloc` allocator, It has with excellent performance and reduces fragmentation
+
 reduce file size
-jemmaloc
-    Avoid memory fragmentation (for long time of running process) and quick deallocation
-memmap
 from_str_unchecked
 reduce/fold
     use of excessive functional sintaxe could result in a code with bad readability. 
@@ -46,3 +45,4 @@ mock parser
 new type
     impl Into<Player>
     
+serde_json with feature "preserve_order"

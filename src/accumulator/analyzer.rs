@@ -31,6 +31,7 @@ impl<T: Parser> MatchAnalyzer<T> {
         self
     }
 
+    /// Returns `MatchesAccumulator` used by this analyzer.
     pub fn matches(self) -> MatchesAccumulator {
         self.matches
     }

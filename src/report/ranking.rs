@@ -1,20 +1,20 @@
 use crate::{accumulator::match_ranking::MatchRanking, report::Report};
 
-pub struct FormattedReport {}
+pub struct RankingReport {}
 
-impl FormattedReport {
+impl RankingReport {
     pub fn new() -> Self {
         Self {}
     }
 }
 
-impl Default for FormattedReport {
+impl Default for RankingReport {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Report for FormattedReport {
+impl Report for RankingReport {
     fn report(&self, matches: Vec<MatchRanking>) -> String {
         let mut result = String::new();
         for s_match in matches {
@@ -29,15 +29,9 @@ fn report_match(s_match: MatchRanking) -> String {
         "Match {}\nTotal kills: {}\nRanking:\n",
         s_match.id, s_match.total_kills,
     );
-
     for (i, (player, kills)) in s_match.ranking.into_iter().enumerate() {
         lines.push_str(&format!("{} - {player}: {kills}\n", i + 1));
     }
-
-    // for (i, (means, kills)) in s_match.means.into_iter().enumerate() {
-    //     lines.push_str(&format!("{} - {means}: {kills}\n", i + 1));
-    // }
-
     lines.push('\n');
     lines
 }

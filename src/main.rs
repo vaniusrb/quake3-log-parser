@@ -3,6 +3,7 @@ pub mod entities;
 pub mod parser;
 pub mod report;
 
+use crate::report::kills_by_means::KillsByMeansReport;
 use accumulator::{
     analyzer::MatchAnalyzer, match_ranking::MatchRanking, matches_accumulator::MatchesAccumulator,
 };
@@ -11,37 +12,33 @@ use memmap2::Mmap;
 use mimalloc::MiMalloc;
 use parser::regex_parser::RegexParser;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use report::{formatted_report::FormattedReport, Report};
+use report::{ranking::RankingReport, Report};
 use std::{
-    env::args_os,
     fs::File,
     path::{Path, PathBuf},
 };
-
-use crate::report::json_report::KillsByMeansReport;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(version, about = "Parser to Quake 3 Arena server log")]
 struct Args {
     /// Log filename
     #[arg(short, long, default_value = "res/qgames.log")]
     file: PathBuf,
-    /// Show Means of death
+    /// Show kills by means report
     #[arg(long)]
-    mod_: bool,
+    kbm: bool,
 }
 
 fn main() {
-    let mut args = Args::parse();
+    let args = Args::parse();
     let path = args.file;
-    //.expect("provide a path to the file as an argument");
 
     let path = Path::new(&path);
-    let file = File::open(path).expect("failed to open file");
-    let mapped_data = unsafe { Mmap::map(&file) }.expect("failed to create memory map");
+    let file = File::open(path).expect("error to open file");
+    let mapped_data = unsafe { Mmap::map(&file) }.expect("error to create memory map");
 
     let rows = &mapped_data
         .split(|&b| b == b'\n')
@@ -64,18 +61,11 @@ fn main() {
         .map(MatchRanking::new)
         .collect::<Vec<_>>();
 
-    // args.mod_ = true;
-    let report: Box<dyn Report> = if args.mod_ {
+    // Print report
+    let report: Box<dyn Report> = if args.kbm {
         Box::new(KillsByMeansReport::new())
     } else {
-        Box::new(FormattedReport::new())
+        Box::new(RankingReport::new())
     };
-
     println!("{}", report.report(rankings));
-}
-
-#[cfg(test)]
-mod tests {
-
-    use super::*;
 }
